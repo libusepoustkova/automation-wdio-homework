@@ -41,17 +41,13 @@ describe('Objednavka_pro_MSZS', () => {
         ico.setValue(ICO);
         const client = $('#client');
         browser.keys('Enter');
-        // browser.pause(5000);
         const toastMessage = $('.toast-message');
         toastMessage.waitForExist();
         expect(toastMessage.getText()).toEqual('Data z ARESu úspěšně načtena');
         const fieldName = getFieldValueById('client');
         const fieldAddress = getFieldValueById('address');
-        // console.log(fieldName, fieldAddress)
         expect(fieldName).toEqual(clientName);
         expect(fieldAddress).toEqual(address);
-        browser.saveScreenshot('vyplneno.png');
-
     });
     it('should not auto fill items when set invalid ICO ', () => {
         const ico = $('#ico');
@@ -64,12 +60,10 @@ describe('Objednavka_pro_MSZS', () => {
         const fieldAddress = getFieldValueById('address');
         expect(fieldName).toEqual('');
         expect(fieldAddress).toEqual('');
-        browser.saveScreenshot('vyplneno2.png');
-
-
     });
+
 //Uživatel může odeslat vyplněnou objednávku na příměstský tábor
-    it('should create order', () => {
+    it('should create and send order', () => {
         browser.url('objednavka/pridat');
         const ico = $('#ico');
         ico.setValue(ICO);
@@ -82,7 +76,6 @@ describe('Objednavka_pro_MSZS', () => {
         const fieldName = getFieldValueById('client');
         const fieldAddress = getFieldValueById('address');
 
-        console.log(fieldName, fieldAddress)
         expect(fieldName).toEqual(clientName);
         expect(fieldAddress).toEqual(address);
 
@@ -109,7 +102,6 @@ describe('Objednavka_pro_MSZS', () => {
         fieldCampStudents.setValue('5');
         fieldCampAge.setValue('12-13');
         fieldCampAdults.setValue('3');
-        browser.saveScreenshot('vyplneno3.png');
         buttonPrimary.click();
         toastMessage.waitForExist();
         expect(toastMessage.getText()).toEqual('Objednávka byla úspěšně uložena');
@@ -127,15 +119,10 @@ describe('Objednavka_pro_MSZS', () => {
         navbarPrimestskyTabor.click();
         const buttonPrimary = $('.btn-primary');
         buttonPrimary.click();
-        //const error = ico.fieldError.getText()
-        //const fieldError = $('.invalid-feedback');
-        //expect(fieldError.getText()).toEqual('Vyplňte prosím toto pole.')
-
         expect(header).toBeDisplayed();
-
     });
      // Zadaná adresa neexistuje, zkontrolujte překlepy
-     it('should not create order with invalid addresse ', () => {
+     it('should not create order with invalid address ', () => {
         browser.url('objednavka/pridat');
         const header = $('header').$('h1*=Nová objednávka');
         const ico = $('#ico');
@@ -160,7 +147,6 @@ describe('Objednavka_pro_MSZS', () => {
         const navbarPrimestskyTabor = $('#nav-home-tab');
         navbarPrimestskyTabor.click();
         const partCamp = $('#camp-date_part');
-        // expect(partCamp).toBeDisplayed();
         const fieldCampStudents = $('#camp-students');
         const fieldCampAge = $('#camp-age');
         const fieldCampAdults = $('#camp-adults');
@@ -184,6 +170,5 @@ describe('Objednavka_pro_MSZS', () => {
         expect(toastMessage.getText()).toEqual('Více polí obsahuje špatně zadanou hodnotu');
         expect(header).toBeDisplayed();
 })
-
 });
 
