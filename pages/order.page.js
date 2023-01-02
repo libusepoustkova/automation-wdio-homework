@@ -10,24 +10,16 @@ class OrderPage {
     get header() { return $('header').$('h1*=Nová objednávka'); }
     get navbarPrimestskyTabor() { return  $('#nav-home-tab'); }
     get buttonPrimary() { return $('.btn-primary'); }
-
     get fieldSubstituteName() { return $('#substitute'); }
-
     get fieldContactName() { return $('#contact_name'); }
-
     get fieldContactTel () { return $('#contact_tel'); }
-
     get fieldContactMail () { return $('#contact_mail'); }
-
     get fieldStartDate () { return $('#start_date_1'); }
-
     get fieldEndDate () { return $('#end_date_1'); }
-
     get partCamp () { return $('#camp-date_part'); }
     get fieldCampStudents () { return $('#camp-students'); }
     get fieldCampAge () { return $('#camp-age'); }
     get fieldCampAdults () { return $('#camp-adults'); }
-
     getToastMessage() { return this.toast.getText(); }
 
     set_number_ICO(numberICO) {
@@ -47,6 +39,7 @@ class OrderPage {
         this.fieldCampAge.setValue(age);
         this.fieldCampAdults.setValue(numAdults);
     }
+
     open_primestskyTabor() {
         this.navbarPrimestskyTabor.click();
     }
