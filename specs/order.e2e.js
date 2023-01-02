@@ -10,21 +10,20 @@ import {
     endDate
 } from './fixtures.js'
 import {getFieldValueById} from "../pages/functions";
+import OrderPage from "../pages/order.page";
 
-describe ('Navigace_do_objednavky', () => {
+describe('Navigace_do_objednavky', () => {
     beforeEach(() => {
         browser.reloadSession();
         browser.url('');
     });
     it('should show form for order', () => {
         const pro_ucitele = $('.dropdown-toggle=Pro učitelé');
-        // console.log(pro_ucitele.getText(), pro_ucitele.getTagName());
         const order_forMSZS = $('.dropdown-item=Objednávka pro MŠ/ZŠ');
         pro_ucitele.click();
         expect(order_forMSZS).toBeDisplayed();
         order_forMSZS.click()
-        const header = $('header').$('h1*=Nová objednávka')
-        expect(header).toBeDisplayed();
+        expect(OrderPage.header).toBeDisplayed();
     });
 });
 
@@ -35,140 +34,81 @@ describe('Objednavka_pro_MSZS', () => {
         browser.url('objednavka/pridat');
     });
 
-     it('should auto fill items when set valid ICO ', () => {
-
-        const ico = $('#ico');
-        ico.setValue(ICO);
-        const client = $('#client');
-        browser.keys('Enter');
-        const toastMessage = $('.toast-message');
-        toastMessage.waitForExist();
-        expect(toastMessage.getText()).toEqual('Data z ARESu úspěšně načtena');
-        const fieldName = getFieldValueById('client');
-        const fieldAddress = getFieldValueById('address');
-        expect(fieldName).toEqual(clientName);
-        expect(fieldAddress).toEqual(address);
+    it('should auto fill items when set valid ICO ', () => {
+        OrderPage.set_number_ICO(ICO);
+        expect(OrderPage.getToastMessage()).toEqual('Data z ARESu úspěšně načtena');
+        expect(OrderPage.fieldName).toEqual(clientName);
+        expect(OrderPage.fieldAddress).toEqual(address);
     });
+
     it('should not auto fill items when set invalid ICO ', () => {
-        const ico = $('#ico');
-        ico.setValue('12345');
-        browser.keys('Enter');
-        const toastMessage = $('.toast-message');
-        toastMessage.waitForExist();
-        expect(toastMessage.getText()).toEqual('IČO nenalezeno, zkontrolujte jej prosím');
-        const fieldName = getFieldValueById('client');
-        const fieldAddress = getFieldValueById('address');
-        expect(fieldName).toEqual('');
-        expect(fieldAddress).toEqual('');
+        OrderPage.set_number_ICO('12345');
+        expect(OrderPage.getToastMessage()).toEqual('IČO nenalezeno, zkontrolujte jej prosím');
+        expect(OrderPage.fieldName).toEqual('');
+        expect(OrderPage.fieldAddress).toEqual('');
     });
 
 //Uživatel může odeslat vyplněnou objednávku na příměstský tábor
     it('should create and send order', () => {
-        browser.url('objednavka/pridat');
-        const ico = $('#ico');
-        ico.setValue(ICO);
-        const client = $('#client');
-        browser.keys('Enter');
-        const toastMessage = $('.toast-message');
-        toastMessage.waitForExist();
-        expect(toastMessage.getText()).toEqual('Data z ARESu úspěšně načtena');
-
-        const fieldName = getFieldValueById('client');
-        const fieldAddress = getFieldValueById('address');
-
-        expect(fieldName).toEqual(clientName);
-        expect(fieldAddress).toEqual(address);
-
-        const fieldSubstituteName = $('#substitute');
-        const fieldContactName = $('#contact_name');
-        const fieldContactTel = $('#contact_tel');
-        const fieldContactMail = $('#contact_mail');
-        const fieldStartDate = $('#start_date_1');
-        const fieldEndDate = $('#end_date_1');
-        const navbarPrimestskyTabor = $('#nav-home-tab');
-        navbarPrimestskyTabor.click();
-        const partCamp = $('#camp-date_part');
-        expect(partCamp).toBeDisplayed();
-        const fieldCampStudents = $('#camp-students');
-        const fieldCampAge = $('#camp-age');
-        const fieldCampAdults = $('#camp-adults');
-        const buttonPrimary = $('.btn-primary');
-        fieldSubstituteName.setValue(substituteName);
-        fieldContactName.setValue(contactName);
-        fieldContactTel.setValue(contactPhone);
-        fieldContactMail.setValue(contactEmail);
-        fieldStartDate.setValue(startDate);
-        fieldEndDate.setValue(endDate);
-        fieldCampStudents.setValue('5');
-        fieldCampAge.setValue('12-13');
-        fieldCampAdults.setValue('3');
-        buttonPrimary.click();
-        toastMessage.waitForExist();
-        expect(toastMessage.getText()).toEqual('Objednávka byla úspěšně uložena');
+        OrderPage.set_number_ICO(ICO);
+        //expect(OrderPage.getToastMessage()).toEqual('Data z ARESu úspěšně načtena');
+        OrderPage.open_primestskyTabor();
+        expect(OrderPage.partCamp).toBeDisplayed();
+        const numStudents = 5;
+        const age = '12';
+        const numAdults = 2;
+        OrderPage.fill_Order(substituteName, contactName, contactPhone, contactEmail, startDate, endDate, numStudents, age, numAdults)
+        OrderPage.save_order();
+        OrderPage.toast.waitForExist();
+        expect(OrderPage.getToastMessage()).toEqual('Objednávka byla úspěšně uložena');
         const tableCardBody = $('.card-body');
         expect(tableCardBody).toBeDisplayed();
     });
 
     //Objednávku nelze odeslat pokud není řádně vyplněna
-     it('should not create order with blank items ', () => {
-        browser.url('objednavka/pridat');
-        const header = $('header').$('h1*=Nová objednávka')
-        expect(header).toBeDisplayed();
-        const navbarPrimestskyTabor = $('#nav-home-tab');
-        const ico = $('#ico');
-        navbarPrimestskyTabor.click();
-        const buttonPrimary = $('.btn-primary');
-        buttonPrimary.click();
-        expect(header).toBeDisplayed();
+    it('should not create order with blank items ', () => {
+        OrderPage.open_primestskyTabor();
+        OrderPage.save_order();
+        expect(OrderPage.header).toBeDisplayed();
     });
-     // Zadaná adresa neexistuje, zkontrolujte překlepy
-     it('should not create order with invalid address ', () => {
-        browser.url('objednavka/pridat');
-        const header = $('header').$('h1*=Nová objednávka');
-        const ico = $('#ico');
-        ico.setValue(ICO);
-        const client = $('#client');
-        browser.keys('Enter');
-        const toastMessage = $('.toast-message');
-        toastMessage.waitForExist();
-        expect(toastMessage.getText()).toEqual('Data z ARESu úspěšně načtena');
-        //
-        const fieldName = getFieldValueById('client');
-        const fieldAddress = getFieldValueById('address');
-        expect(fieldName).toEqual(clientName);
-        expect(fieldAddress).toEqual(address);
-        //
-        const fieldSubstituteName = $('#substitute');
-        const fieldContactName = $('#contact_name');
-        const fieldContactTel = $('#contact_tel');
-        const fieldContactMail = $('#contact_mail');
-        const fieldStartDate = $('#start_date_1');
-        const fieldEndDate = $('#end_date_1');
-        const navbarPrimestskyTabor = $('#nav-home-tab');
-        navbarPrimestskyTabor.click();
-        const partCamp = $('#camp-date_part');
-        const fieldCampStudents = $('#camp-students');
-        const fieldCampAge = $('#camp-age');
-        const fieldCampAdults = $('#camp-adults');
 
-        fieldSubstituteName.setValue(substituteName);
-        fieldContactName.setValue(contactName);
-        // nastaveni nespravneho formatu telefonu
-        fieldContactTel.setValue('123');
-        // nastaveni nespravneho formatu telefonu
-        fieldContactMail.setValue('ghj@g');
-        fieldStartDate.setValue(startDate);
-        fieldEndDate.setValue(endDate);
-        fieldCampStudents.setValue('5');
-        fieldCampAge.setValue('12-13');
-        fieldCampAdults.setValue('3');
-        const buttonPrimary = $('.btn-primary');
-        buttonPrimary.click();
-        expect(header).toBeDisplayed();
-        toastMessage.waitForExist();
-        //expect(toastMessage.getText()).toEqual('Některé pole obsahuje špatně zadanou hodnotu');
-        expect(toastMessage.getText()).toEqual('Více polí obsahuje špatně zadanou hodnotu');
-        expect(header).toBeDisplayed();
-})
+    // nastaveni nespravneho formatu telefonu
+    it('should not create order with invalid phone number ', () => {
+        OrderPage.set_number_ICO(ICO);
+        OrderPage.open_primestskyTabor();
+        expect(OrderPage.partCamp).toBeDisplayed();
+        const numStudents = 5;
+        const age = '12';
+        const numAdults = 2;
+        const invalidPhone = '123';
+        const invalid_feedback_phone = $('#contact_tel').$('..').$('strong');
+        OrderPage.fill_Order(substituteName, contactName, invalidPhone, contactEmail, startDate, endDate, numStudents, age, numAdults)
+        OrderPage.save_order();
+        OrderPage.toast.waitForExist();
+        expect(OrderPage.getToastMessage()).toEqual('Některé pole obsahuje špatně zadanou hodnotu');
+        expect(invalid_feedback_phone.getText()).toEqual('Telefon není ve správném formátu');
+        expect(OrderPage.header).toBeDisplayed();
+    });
+
+    // nastaveni nespravneho formatu telofonu a emailu
+    it('should not create order with invalid phone number and address ', () => {
+        OrderPage.set_number_ICO(ICO);
+        OrderPage.open_primestskyTabor();
+        expect(OrderPage.partCamp).toBeDisplayed();
+        const numStudents = 5;
+        const age = '12';
+        const numAdults = 2;
+        const invalidPhone = '123';
+        const invalidEmail = 'ahoj@gmail'
+        const invalid_feedback_phone = $('#contact_tel').$('..').$('strong');
+        const invalid_feedback_email = $('#contact_mail').$('..').$('strong');
+        OrderPage.fill_Order(substituteName, contactName, invalidPhone, invalidEmail, startDate, endDate, numStudents, age, numAdults)
+        OrderPage.save_order();
+        OrderPage.toast.waitForExist();
+        expect(OrderPage.getToastMessage()).toEqual('Více polí obsahuje špatně zadanou hodnotu');
+        expect(invalid_feedback_phone.getText()).toEqual('Telefon není ve správném formátu');
+        expect(invalid_feedback_email.getText()).toEqual('Zadaná adresa neexistuje, zkontrolujte překlepy');
+        expect(OrderPage.header).toBeDisplayed();
+    });
 });
 
